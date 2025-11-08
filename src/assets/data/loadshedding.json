@@ -1,0 +1,850 @@
+ [
+        {
+        "date": "2024-03-14",
+        "stage": 3,
+        "duration_hours": 2.5,
+        "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+        "time_slots": ["18:00-20:30"],
+        "total_customers_affected": 310000
+        },
+        {
+        "date": "2024-03-12",
+        "stage": 1,
+        "duration_hours": 2,
+        "areas_affected": ["Sea Point", "Green Point", "Mouille Point"],
+        "time_slots": ["14:00-16:00"],
+        "total_customers_affected": 75000
+        },
+    {
+      "date": "2024-03-10",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Mitchells Plain", "Gugulethu"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 450000
+    },
+    {
+      "date": "2024-03-08",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 320000
+    },
+    {
+      "date": "2024-03-05",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["16:00-18:00", "20:00-22:00"],
+      "total_customers_affected": 850000
+    },
+    {
+      "date": "2024-02-28",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Constantia", "Wynberg"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 180000
+    },
+    {
+      "date": "2024-02-25",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["City Bowl", "Sea Point", "Green Point"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 150000
+    },
+    {
+      "date": "2024-02-20",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "22:00-00:30"],
+      "total_customers_affected": 950000
+    },
+    {
+      "date": "2024-02-15",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Milnerton"],
+      "time_slots": ["06:00-08:00"],
+      "total_customers_affected": 220000
+    },
+    {
+      "date": "2024-02-10",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg", "Somerset West", "Strand"],
+      "time_slots": ["12:00-14:00", "18:00-20:00"],
+      "total_customers_affected": 280000
+    },
+    {
+      "date": "2024-02-05",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Atlantic Seaboard", "Camps Bay", "Hout Bay"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 90000
+    },
+    {
+      "date": "2024-01-30",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "20:00-22:30", "02:00-04:30"],
+      "total_customers_affected": 1100000
+    },
+    {
+      "date": "2024-01-25",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Philippi", "Crossroads"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 380000
+    },
+    {
+      "date": "2024-01-20",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Kuils River", "Brackenfell"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 260000
+    },
+    {
+      "date": "2024-01-15",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Southern Suburbs", "City Bowl", "Sea Point"],
+      "time_slots": ["16:00-18:00", "22:00-00:00"],
+      "total_customers_affected": 420000
+    },
+    {
+      "date": "2024-01-10",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Parklands", "Sunningdale"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 140000
+    },
+    {
+      "date": "2024-01-05",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Hanover Park", "Manenberg"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 320000
+    },
+    {
+      "date": "2023-12-28",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30"],
+      "total_customers_affected": 880000
+    },
+    {
+      "date": "2023-12-20",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Helderberg Area", "Gordon's Bay"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 110000
+    },
+    {
+      "date": "2023-12-15",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["18:00-20:00", "02:00-04:00"],
+      "total_customers_affected": 350000
+    },
+    {
+      "date": "2023-12-10",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["City Center", "V&A Waterfront"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 80000
+    },
+    {
+      "date": "2023-12-05",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Nyanga", "Gugulethu"],
+      "time_slots": ["16:00-18:30"],
+      "total_customers_affected": 410000
+    },
+    {
+      "date": "2023-11-30",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "22:00-00:30", "04:00-06:30"],
+      "total_customers_affected": 1050000
+    },
+    {
+      "date": "2023-11-25",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Claremont", "Newlands"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 190000
+    },
+    {
+      "date": "2023-11-20",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Atlantic Seaboard", "Sea Point", "Green Point"],
+      "time_slots": ["20:00-22:00", "00:00-02:00"],
+      "total_customers_affected": 120000
+    },
+    {
+      "date": "2023-11-15",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Milnerton"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 210000
+    },
+    {
+      "date": "2023-11-10",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Philippi", "Crossroads"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 360000
+    },
+    {
+      "date": "2023-11-05",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["12:00-14:30", "18:00-20:30", "02:00-04:30"],
+      "total_customers_affected": 820000
+    },
+    {
+      "date": "2023-10-30",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Kuils River"],
+      "time_slots": ["16:00-18:00"],
+      "total_customers_affected": 240000
+    },
+    {
+      "date": "2023-10-25",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg Area", "Somerset West"],
+      "time_slots": ["14:00-16:00", "22:00-00:00"],
+      "total_customers_affected": 200000
+    },
+    {
+      "date": "2023-10-20",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["City Bowl", "CBD"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 95000
+    },
+    {
+      "date": "2023-10-15",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Gugulethu", "Nyanga"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 390000
+    },
+    {
+      "date": "2023-10-10",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30", "04:00-06:30"],
+      "total_customers_affected": 980000
+    },
+    {
+      "date": "2024-03-14",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 310000
+    },
+    {
+      "date": "2024-03-12",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Sea Point", "Green Point", "Mouille Point"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 75000
+    },
+    {
+      "date": "2024-03-10",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Mitchells Plain", "Gugulethu"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 450000
+    },
+    {
+      "date": "2024-03-08",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 320000
+    },
+    {
+      "date": "2024-03-07",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg", "Somerset West", "Strand"],
+      "time_slots": ["16:00-18:00", "20:00-22:00"],
+      "total_customers_affected": 290000
+    },
+    {
+      "date": "2024-03-05",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["16:00-18:00", "20:00-22:00"],
+      "total_customers_affected": 850000
+    },
+    {
+      "date": "2024-03-03",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Parklands"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 195000
+    },
+    {
+      "date": "2024-03-01",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "22:00-00:30"],
+      "total_customers_affected": 920000
+    },
+    {
+      "date": "2024-02-28",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Constantia", "Wynberg"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 180000
+    },
+    {
+      "date": "2024-02-27",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Philippi", "Crossroads"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 420000
+    },
+    {
+      "date": "2024-02-25",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["City Bowl", "Sea Point", "Green Point"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 150000
+    },
+    {
+      "date": "2024-02-23",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Brackenfell", "Kuils River"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 270000
+    },
+    {
+      "date": "2024-02-22",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Atlantic Seaboard", "Camps Bay", "Hout Bay"],
+      "time_slots": ["18:00-20:00", "22:00-00:00"],
+      "total_customers_affected": 110000
+    },
+    {
+      "date": "2024-02-20",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "22:00-00:30"],
+      "total_customers_affected": 950000
+    },
+    {
+      "date": "2024-02-18",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Milnerton", "Table View", "Parklands"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 210000
+    },
+    {
+      "date": "2024-02-15",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Milnerton"],
+      "time_slots": ["06:00-08:00"],
+      "total_customers_affected": 220000
+    },
+    {
+      "date": "2024-02-13",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Hanover Park", "Manenberg"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 380000
+    },
+    {
+      "date": "2024-02-12",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Southern Suburbs", "Rondebosch", "Newlands"],
+      "time_slots": ["16:00-18:00", "20:00-22:00"],
+      "total_customers_affected": 240000
+    },
+    {
+      "date": "2024-02-10",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg", "Somerset West", "Strand"],
+      "time_slots": ["12:00-14:00", "18:00-20:00"],
+      "total_customers_affected": 280000
+    },
+    {
+      "date": "2024-02-08",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["City Center", "Gardens", "Tambourskloof"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 85000
+    },
+    {
+      "date": "2024-02-05",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Atlantic Seaboard", "Camps Bay", "Hout Bay"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 90000
+    },
+    {
+      "date": "2024-02-03",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "22:00-00:30", "02:00-04:30"],
+      "total_customers_affected": 1050000
+    },
+    {
+      "date": "2024-02-01",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 330000
+    },
+    {
+      "date": "2024-01-30",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "20:00-22:30", "02:00-04:30"],
+      "total_customers_affected": 1100000
+    },
+    {
+      "date": "2024-01-28",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Sea Point", "Green Point", "Three Anchor Bay"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 78000
+    },
+    {
+      "date": "2024-01-25",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Philippi", "Crossroads"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 380000
+    },
+    {
+      "date": "2024-01-23",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["16:00-18:00", "22:00-00:00"],
+      "total_customers_affected": 870000
+    },
+    {
+      "date": "2024-01-20",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Kuils River", "Brackenfell"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 260000
+    },
+    {
+      "date": "2024-01-18",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Claremont", "Kenilworth"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 190000
+    },
+    {
+      "date": "2024-01-15",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Southern Suburbs", "City Bowl", "Sea Point"],
+      "time_slots": ["16:00-18:00", "22:00-00:00"],
+      "total_customers_affected": 420000
+    },
+    {
+      "date": "2024-01-12",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30"],
+      "total_customers_affected": 910000
+    },
+    {
+      "date": "2024-01-10",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Parklands", "Sunningdale"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 140000
+    },
+    {
+      "date": "2024-01-08",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Helderberg", "Somerset West", "Gordon's Bay"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 220000
+    },
+    {
+      "date": "2024-01-05",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Hanover Park", "Manenberg"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 320000
+    },
+    {
+      "date": "2024-01-03",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["City Bowl", "Gardens", "Oranjezicht"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 95000
+    },
+    {
+      "date": "2024-01-01",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["14:00-16:00", "20:00-22:00"],
+      "total_customers_affected": 860000
+    },
+    {
+      "date": "2023-12-30",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "22:00-00:30", "02:00-04:30"],
+      "total_customers_affected": 1080000
+    },
+    {
+      "date": "2023-12-28",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30"],
+      "total_customers_affected": 880000
+    },
+    {
+      "date": "2023-12-25",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 280000
+    },
+    {
+      "date": "2023-12-23",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Southern Suburbs", "Constantia", "Wynberg"],
+      "time_slots": ["18:00-20:00", "22:00-00:00"],
+      "total_customers_affected": 230000
+    },
+    {
+      "date": "2023-12-20",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Helderberg Area", "Gordon's Bay"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 110000
+    },
+    {
+      "date": "2023-12-18",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Nyanga", "Gugulethu"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 410000
+    },
+    {
+      "date": "2023-12-15",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["18:00-20:00", "02:00-04:00"],
+      "total_customers_affected": 350000
+    },
+    {
+      "date": "2023-12-12",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Milnerton"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 205000
+    },
+    {
+      "date": "2023-12-10",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["City Center", "V&A Waterfront"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 80000
+    },
+    {
+      "date": "2023-12-08",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["10:00-12:30", "18:00-20:30", "02:00-04:30"],
+      "total_customers_affected": 840000
+    },
+    {
+      "date": "2023-12-05",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Nyanga", "Gugulethu"],
+      "time_slots": ["16:00-18:30"],
+      "total_customers_affected": 410000
+    },
+    {
+      "date": "2023-12-03",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Sea Point", "Green Point", "Fresnaye"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 72000
+    },
+    {
+      "date": "2023-11-30",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["06:00-08:30", "14:00-16:30", "22:00-00:30", "04:00-06:30"],
+      "total_customers_affected": 1050000
+    },
+    {
+      "date": "2023-11-28",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg", "Somerset West", "Strand"],
+      "time_slots": ["16:00-18:00", "20:00-22:00"],
+      "total_customers_affected": 270000
+    },
+    {
+      "date": "2023-11-25",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Claremont", "Newlands"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 190000
+    },
+    {
+      "date": "2023-11-23",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Philippi", "Crossroads"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 370000
+    },
+    {
+      "date": "2023-11-20",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Atlantic Seaboard", "Sea Point", "Green Point"],
+      "time_slots": ["20:00-22:00", "00:00-02:00"],
+      "total_customers_affected": 120000
+    },
+    {
+      "date": "2023-11-18",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Brackenfell", "Kuils River"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 250000
+    },
+    {
+      "date": "2023-11-15",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Blouberg", "Milnerton"],
+      "time_slots": ["08:00-10:00"],
+      "total_customers_affected": 210000
+    },
+    {
+      "date": "2023-11-12",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["12:00-14:30", "18:00-20:30", "02:00-04:30"],
+      "total_customers_affected": 820000
+    },
+    {
+      "date": "2023-11-10",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Philippi", "Crossroads"],
+      "time_slots": ["18:00-20:30"],
+      "total_customers_affected": 360000
+    },
+    {
+      "date": "2023-11-08",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["City Center", "Gardens", "Tambourskloof"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 88000
+    },
+    {
+      "date": "2023-11-05",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["12:00-14:30", "18:00-20:30", "02:00-04:30"],
+      "total_customers_affected": 820000
+    },
+    {
+      "date": "2023-11-03",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Southern Suburbs", "Rondebosch", "Newlands"],
+      "time_slots": ["16:00-18:00", "22:00-00:00"],
+      "total_customers_affected": 220000
+    },
+    {
+      "date": "2023-10-30",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Northern Suburbs", "Kuils River"],
+      "time_slots": ["16:00-18:00"],
+      "total_customers_affected": 240000
+    },
+    {
+      "date": "2023-10-28",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Gugulethu", "Nyanga"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 420000
+    },
+    {
+      "date": "2023-10-25",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Helderberg Area", "Somerset West"],
+      "time_slots": ["14:00-16:00", "22:00-00:00"],
+      "total_customers_affected": 200000
+    },
+    {
+      "date": "2023-10-22",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Table View", "Parklands", "Sunningdale"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 160000
+    },
+    {
+      "date": "2023-10-20",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["City Bowl", "CBD"],
+      "time_slots": ["10:00-12:00"],
+      "total_customers_affected": 95000
+    },
+    {
+      "date": "2023-10-18",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30", "04:00-06:30"],
+      "total_customers_affected": 1020000
+    },
+    {
+      "date": "2023-10-15",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Khayelitsha", "Gugulethu", "Nyanga"],
+      "time_slots": ["20:00-22:30"],
+      "total_customers_affected": 390000
+    },
+    {
+      "date": "2023-10-12",
+      "stage": 2,
+      "duration_hours": 2,
+      "areas_affected": ["Sea Point", "Green Point", "Mouille Point"],
+      "time_slots": ["12:00-14:00"],
+      "total_customers_affected": 70000
+    },
+    {
+      "date": "2023-10-10",
+      "stage": 6,
+      "duration_hours": 8,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["08:00-10:30", "16:00-18:30", "00:00-02:30", "04:00-06:30"],
+      "total_customers_affected": 980000
+    },
+    {
+      "date": "2023-10-08",
+      "stage": 4,
+      "duration_hours": 4,
+      "areas_affected": ["Northern Suburbs", "Bellville", "Durbanville"],
+      "time_slots": ["18:00-20:00", "22:00-00:00"],
+      "total_customers_affected": 340000
+    },
+    {
+      "date": "2023-10-05",
+      "stage": 3,
+      "duration_hours": 2.5,
+      "areas_affected": ["Mitchells Plain", "Hanover Park", "Manenberg"],
+      "time_slots": ["16:00-18:30"],
+      "total_customers_affected": 350000
+    },
+    {
+      "date": "2023-10-03",
+      "stage": 1,
+      "duration_hours": 2,
+      "areas_affected": ["Southern Suburbs", "Constantia", "Wynberg"],
+      "time_slots": ["14:00-16:00"],
+      "total_customers_affected": 175000
+    },
+    {
+      "date": "2023-10-01",
+      "stage": 5,
+      "duration_hours": 6,
+      "areas_affected": ["All Cape Town"],
+      "time_slots": ["10:00-12:30", "18:00-20:30", "02:00-04:30"],
+      "total_customers_affected": 860000
+    }
+ ]

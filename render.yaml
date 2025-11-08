@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: safemap-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: GOOGLE_MAPS_API_KEY
+        value: AIzaSyBP_F00dy97numOrcqJAfrRiYc8v_TRpQQ
+      - key: GEMINI_API_KEY
+        value: AIzaSyDPzNVw2WgkmiZvTP-qU0ZEeAT04dqyMvk
+
+  - type: web
+    name: safemap-frontend
+    env: static
+    rootDir: src
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist

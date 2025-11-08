@@ -1,0 +1,22 @@
+.home {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; // ✅ No scrolling
+  display: flex;
+  flex-direction: column; // ✅ Stack NavBar and Map vertically
+
+  &__nav {
+    height: 10vh;
+    width: 100%;
+    background-color: white; // optional if you want background color
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); // optional subtle shadow
+    z-index: 10;
+  }
+
+  &__content {
+    flex: 1; // ✅ Take the rest of available space (90vh)
+    width: 100%;
+    overflow: hidden;
+    position: relative; // useful if child components like map need it
+  }
+}

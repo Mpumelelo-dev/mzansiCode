@@ -352,7 +352,7 @@ export default function MapComponent() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/crimes");
+        const res = await fetch("https://gewhackai25.onrender.com/api/crimes");
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
         const data = await res.json();
@@ -855,7 +855,7 @@ export default function MapComponent() {
     if (!destCoords) {
       try {
         const geocodeRes = await fetch(
-          `http://localhost:5000/api/geocode?address=${encodeURIComponent(destination)}`
+          `https://gewhackai25.onrender.com/api/geocode?address=${encodeURIComponent(destination)}`
         );
         if (!geocodeRes.ok) throw new Error("Geocoding failed");
         

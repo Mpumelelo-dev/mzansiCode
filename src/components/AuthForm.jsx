@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import { auth, db } from '../firebaseConfig';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import axios from 'axios';
 import styles from './AuthForm.module.css';
 import logo from './safeMzansi-logo.png';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AuthForm() {
   const [isSignup, setIsSignup] = useState(false);
@@ -53,50 +50,62 @@ export default function AuthForm() {
     setIsLoading(true);
 
     try {
-      if (isSignup) {
-        // Sign up logic
-        const userCred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-        await setDoc(doc(db, 'users', userCred.user.uid), {
-          name: form.name,
-          surname: form.surname,
-          cell: form.cell,
-          email: form.email,
-          emergencyContacts: form.emergencyContacts,
-          createdAt: new Date(),
-        });
-        console.log('User created successfully');
-        // Navigation is handled by App.jsx auth state listener
-      } else {
-        // Login logic
-        await signInWithEmailAndPassword(auth, form.email, form.password);
-        console.log('User logged in successfully');
-        // Navigation is handled by App.jsx auth state listener
-      }
+      const endpoint = isSignup ? '/auth/signup' : '/auth/login';
+      
+      const requestData = isSignup ? {
+        email: form.email,
+        password: form.password,
+        name: form.name,
+        surname: form.surname,
+        cell: form.cell,
+        emergencyContacts: form.emergencyContacts
+      } : {
+        email: form.email,
+        password: form.password
+      };
+
+      console.log(`📡 Sending ${isSignup ? 'signup' : 'login'} request...`);
+      
+      const response = await axios.post(`${API_BASE_URL}${endpoint}`, requestData);
+      
+      console.log('✅ Response:', response.data);
+      
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('userId', response.data.user.userId);
+      
+      console.log(isSignup ? '✅ Account created successfully!' : '✅ Login successful!');
+      
+      // Trigger auth state change
+      window.dispatchEvent(new Event('auth-state-changed'));
+      
     } catch (err) {
-      console.error('Auth error:', err);
-      setError(getErrorMessage(err.code));
+      console.error('❌ Error:', err);
+      
+      if (err.response) {
+        // Server responded with error
+        setError(getErrorMessage(err.response.data.error));
+      } else if (err.request) {
+        setError('Cannot connect to server. Please check if backend is running.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const getErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Please login instead.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters.';
-      case 'auth/user-not-found':
-        return 'No account found with this email. Please sign up.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      default:
-        return 'An error occurred. Please try again.';
-    }
+    const errorMap = {
+      'USER_EXISTS': 'This email is already registered. Please login instead.',
+      'USER_NOT_FOUND': 'No account found with this email. Please sign up.',
+      'INVALID_PASSWORD': 'Incorrect password. Please try again.',
+      'INVALID_EMAIL': 'Please enter a valid email address.',
+      'WEAK_PASSWORD': 'Password should be at least 6 characters.',
+      'TOO_MANY_ATTEMPTS': 'Too many failed attempts. Please try again later.',
+    };
+    
+    return errorMap[errorCode] || errorCode || 'An error occurred. Please try again.';
   };
 
   const resetForm = () => {

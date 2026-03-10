@@ -1,0 +1,42 @@
+.uploadContainer {
+  margin: 20px 0;
+  padding: 20px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.fileInput {
+  margin-bottom: 15px;
+}
+
+.progressContainer {
+  margin-top: 15px;
+}
+
+.fileName {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  word-break: break-all;
+}
+
+.progressBar {
+  width: 100%;
+  height: 20px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #4CAF50;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #666;
+}

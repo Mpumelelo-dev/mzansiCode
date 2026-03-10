@@ -1,0 +1,17 @@
+[
+  {
+    "userId": "user_1773099177398_45ph7fpag",
+    "email": "lelo@gmail.com",
+    "name": "lelo",
+    "surname": "Ngozi",
+    "cell": "0123456789",
+    "emergencyContacts": [
+      {
+        "name": "xxx",
+        "cell": "0123456789",
+        "email": "mn@gmail.com"
+      }
+    ],
+    "createdAt": "2026-03-09T23:32:57.400Z"
+  }
+]

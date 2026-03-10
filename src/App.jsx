@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { auth } from './firebaseConfig'; 
-import { onAuthStateChanged } from 'firebase/auth';
 import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import AuthForm from './components/AuthForm';
@@ -14,14 +12,74 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check for existing user session in localStorage
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const checkUserSession = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('user');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('obsTempCredentials');
+        }
+      }
       setLoading(false);
+    };
+
+    // Check on initial load
+    checkUserSession();
+
+    // Listen for auth state changes (from login/logout)
+    const handleAuthChange = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthChange);
+    
+    // Also listen for storage events (for multi-tab support)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'user') {
+        if (e.newValue) {
+          try {
+            setUser(JSON.parse(e.newValue));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
   }, []);
+
+  // Handle logout function (can be passed to NavBar if needed)
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('obsTempCredentials');
+    setUser(null);
+    window.dispatchEvent(new Event('auth-state-changed'));
+  };
 
   if (loading) {
     return (
@@ -47,8 +105,8 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        {/* Only show NavBar when user is authenticated AND not on auth page */}
-        {user && <NavBar />}
+        {/* Only show NavBar when user is authenticated */}
+        {user && <NavBar onLogout={handleLogout} />}
         
         <main className={`main-content ${user ? 'authenticated' : 'auth-page'}`}>
           <Routes>
@@ -64,23 +122,23 @@ function App() {
             <Route 
               path="/map" 
               element={
-                user ? <MapComponent /> : <Navigate to="/" replace />
+                user ? <MapComponent user={user} /> : <Navigate to="/" replace />
               } 
             />
             
-            {/* Protect home route as well */}
+            {/* Protect home route */}
             <Route 
               path="/home" 
               element={
-                user ? <Home /> : <Navigate to="/" replace />
+                user ? <Home user={user} /> : <Navigate to="/" replace />
               } 
             />
             
-            {/* Add SafetyDashboard route */}
+            {/* Protect SafetyDashboard route */}
             <Route 
               path="/dashboard" 
               element={
-                user ? <SafetyDashboard /> : <Navigate to="/" replace />
+                user ? <SafetyDashboard user={user} /> : <Navigate to="/" replace />
               } 
             />
             

@@ -14,9 +14,9 @@ import {
 } from "@react-google-maps/api";
 import Dictionary from "../Dictionary/Dictionary";
 import "./MapComponent.scss";
-import { auth, db } from "./firebaseConfig";
-import { signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, limit, arrayUnion, increment, getDocs } from "firebase/firestore";
+import axios from 'axios'; // Add axios for API calls
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const RADIUS = 700; // meters for crime hotspots
 const MAX_DIST_KM = 1.0;
@@ -128,7 +128,7 @@ export default function MapComponent() {
   const [startLocation, setStartLocation] = useState("");
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [showCircles, setShowCircles] = useState(true); // Changed from false to true
+  const [showCircles, setShowCircles] = useState(true);
   const [selectedCrime, setSelectedCrime] = useState(null);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -144,7 +144,7 @@ export default function MapComponent() {
   const [showPredictiveDashboard, setShowPredictiveDashboard] = useState(false);
   const [showCommunities, setShowCommunities] = useState(false);
   
-  // User profile states
+  // User profile states - UPDATED to use localStorage/backend instead of Firebase
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -175,78 +175,62 @@ export default function MapComponent() {
     libraries: ["visualization", "places"],
   });
 
-  // Load user profile and check for active tracking sessions
+  // Load user from localStorage (from AuthForm)
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      if (user) {
+    const loadUserFromStorage = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserProfile(userData);
-            setProfileForm({
-              name: userData.name || '',
-              surname: userData.surname || '',
-              cell: userData.cell || '',
-              email: userData.email || '',
-              emergencyContacts: userData.emergencyContacts || [{ name: '', cell: '', email: '' }]
-            });
-          }
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setUserProfile(userData);
+          setProfileForm({
+            name: userData.name || '',
+            surname: userData.surname || '',
+            cell: userData.cell || '',
+            email: userData.email || '',
+            emergencyContacts: userData.emergencyContacts || [{ name: '', cell: '', email: '' }]
+          });
           
-          // Check for active tracking session
-          checkActiveTrackingSession(user.uid);
+          // Check for active tracking session in localStorage
+          checkActiveTrackingSession();
         } catch (error) {
-          console.error('Error loading user profile:', error);
-        }
-      } else {
-        // User logged out, stop any tracking
-        if (isTracking) {
-          await handleStopTracking();
+          console.error('Error loading user from localStorage:', error);
         }
       }
-    });
+    };
 
-    return () => unsubscribe();
+    loadUserFromStorage();
+
+    // Listen for auth state changes (from login/logout)
+    const handleAuthChange = () => {
+      loadUserFromStorage();
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthChange);
+    return () => window.removeEventListener('auth-state-changed', handleAuthChange);
   }, []);
 
-  // Check for active tracking session
-  const checkActiveTrackingSession = async (userId) => {
-    try {
-      const trackingRef = collection(db, 'trackingSessions');
-      const q = query(
-        trackingRef,
-        where('userId', '==', userId),
-        where('status', '==', 'active'),
-        orderBy('startedAt', 'desc'),
-        limit(1)
-      );
-
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        if (!snapshot.empty) {
-          const activeSession = snapshot.docs[0];
-          const sessionData = activeSession.data();
-          setActiveTrackingId(activeSession.id);
-          setSafetyData(sessionData.safetyData || {});
-          setIsTracking(true);
-          
-          // Set the last known location
-          if (sessionData.locations && sessionData.locations.length > 0) {
-            const lastLocation = sessionData.locations[sessionData.locations.length - 1];
-            setTrackingLocation({ lat: lastLocation.lat, lng: lastLocation.lng });
-            setCurrentLocation({ lat: lastLocation.lat, lng: lastLocation.lng });
-            setMapCenter({ lat: lastLocation.lat, lng: lastLocation.lng });
-          }
-        }
-      });
-
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error checking active tracking session:", error);
+  // Check for active tracking session in localStorage
+  const checkActiveTrackingSession = () => {
+    const trackingId = localStorage.getItem('activeTrackingId');
+    const trackingData = localStorage.getItem('safetyData');
+    
+    if (trackingId) {
+      setActiveTrackingId(trackingId);
+      setIsTracking(true);
+    }
+    
+    if (trackingData) {
+      try {
+        setSafetyData(JSON.parse(trackingData));
+      } catch (error) {
+        console.error('Error parsing tracking data:', error);
+      }
     }
   };
 
-  // Firebase tracking functions
+  // Tracking functions (simplified for localStorage)
   const storeTrackingSession = async (location, safetyInfo, action = 'start') => {
     if (!user) {
       throw new Error("User must be logged in to track location");
@@ -254,43 +238,59 @@ export default function MapComponent() {
 
     try {
       if (action === 'start') {
+        const trackingId = `track_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const trackingData = {
-          userId: user.uid,
+          id: trackingId,
+          userId: user.userId,
           userEmail: user.email,
           safetyData: safetyInfo,
           locations: [{
             lat: location.lat,
             lng: location.lng,
-            timestamp: serverTimestamp(),
+            timestamp: new Date().toISOString(),
             accuracy: location.accuracy || null
           }],
           status: 'active',
-          startedAt: serverTimestamp(),
-          lastUpdated: serverTimestamp(),
+          startedAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString(),
           totalLocations: 1
         };
 
-        const docRef = await addDoc(collection(db, 'trackingSessions'), trackingData);
-        setActiveTrackingId(docRef.id);
-        return docRef.id;
+        // Store in localStorage for now (can be extended to backend later)
+        localStorage.setItem('activeTrackingId', trackingId);
+        localStorage.setItem('safetyData', JSON.stringify(safetyInfo));
+        localStorage.setItem(`tracking_${trackingId}`, JSON.stringify(trackingData));
+        
+        setActiveTrackingId(trackingId);
+        return trackingId;
       } else if (action === 'update' && activeTrackingId) {
-        const trackingRef = doc(db, 'trackingSessions', activeTrackingId);
-        await updateDoc(trackingRef, {
-          locations: arrayUnion({
+        const trackingDataStr = localStorage.getItem(`tracking_${activeTrackingId}`);
+        if (trackingDataStr) {
+          const trackingData = JSON.parse(trackingDataStr);
+          trackingData.locations.push({
             lat: location.lat,
             lng: location.lng,
-            timestamp: serverTimestamp(),
+            timestamp: new Date().toISOString(),
             accuracy: location.accuracy || null
-        }),
-          lastUpdated: serverTimestamp(),
-          totalLocations: increment(1)
-        });
+          });
+          trackingData.lastUpdated = new Date().toISOString();
+          trackingData.totalLocations = trackingData.locations.length;
+          
+          localStorage.setItem(`tracking_${activeTrackingId}`, JSON.stringify(trackingData));
+        }
       } else if (action === 'stop' && activeTrackingId) {
-        const trackingRef = doc(db, 'trackingSessions', activeTrackingId);
-        await updateDoc(trackingRef, {
-          status: 'completed',
-          endedAt: serverTimestamp()
-        });
+        const trackingDataStr = localStorage.getItem(`tracking_${activeTrackingId}`);
+        if (trackingDataStr) {
+          const trackingData = JSON.parse(trackingDataStr);
+          trackingData.status = 'completed';
+          trackingData.endedAt = new Date().toISOString();
+          
+          localStorage.setItem(`tracking_${activeTrackingId}`, JSON.stringify(trackingData));
+        }
+        
+        localStorage.removeItem('activeTrackingId');
+        localStorage.removeItem('safetyData');
+        setActiveTrackingId(null);
       }
     } catch (error) {
       console.error("Error storing tracking data:", error);
@@ -300,25 +300,11 @@ export default function MapComponent() {
 
   const storeEmergencyContactNotification = async (safetyInfo) => {
     if (!user) return;
-
-    try {
-      const notificationData = {
-        userId: user.uid,
-        userEmail: user.email,
-        userName: `${userProfile?.name || user.displayName || 'User'}`,
-        safetyData: safetyInfo,
-        timestamp: serverTimestamp(),
-        type: 'tracking_started',
-        message: `Tracking started for ${safetyInfo.destination || 'unknown destination'}`,
-        status: 'sent'
-      };
-
-      await addDoc(collection(db, 'emergencyNotifications'), notificationData);
-    } catch (error) {
-      console.error("Error storing emergency notification:", error);
-    }
+    
+    // For now, just log to console (can be extended to send emails later)
+    console.log('Emergency notification would be sent to:', userProfile?.emergencyContacts);
+    console.log('Safety info:', safetyInfo);
   };
-
 
   const handleSafetyDataUpdate = (safetyInfo) => {
     setSafetyData(safetyInfo);
@@ -326,23 +312,28 @@ export default function MapComponent() {
     localStorage.setItem('safetyData', JSON.stringify(safetyInfo));
   };
 
-  // Load user's tracking history
+  // Load user's tracking history from localStorage
   const loadTrackingSessions = async () => {
     if (!user) return;
     
     try {
-      const trackingRef = collection(db, 'trackingSessions');
-      const q = query(
-        trackingRef,
-        where('userId', '==', user.uid),
-        orderBy('startedAt', 'desc')
-      );
-      
-      const snapshot = await getDocs(q);
-      const sessions = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const sessions = [];
+      // Loop through localStorage keys to find tracking sessions for this user
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('tracking_')) {
+          try {
+            const session = JSON.parse(localStorage.getItem(key));
+            if (session.userId === user.userId) {
+              sessions.push(session);
+            }
+          } catch (e) {
+            // Skip invalid entries
+          }
+        }
+      }
+      // Sort by startedAt descending
+      sessions.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
       setTrackingSessions(sessions);
     } catch (error) {
       console.error("Error loading tracking sessions:", error);
@@ -352,7 +343,7 @@ export default function MapComponent() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("https://gewhackai25.onrender.com/api/crimes");
+        const res = await fetch("http://localhost:5000/api/crimes");
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
         const data = await res.json();
@@ -376,8 +367,7 @@ export default function MapComponent() {
             count: 0, 
             types: {}, 
             points: [],
-            // Use the original crime count based classification for radius
-            crimeLevel: 'low' // Will be updated based on count
+            crimeLevel: 'low'
           };
           agg[nb].count++;
           agg[nb].points.push({ lat: p.lat, lng: p.lng });
@@ -385,7 +375,7 @@ export default function MapComponent() {
           agg[nb].types[key] = (agg[nb].types[key] || 0) + 1;
         });
 
-        // Calculate crime level for each neighborhood based on count (original system)
+        // Calculate crime level for each neighborhood based on count
         Object.keys(agg).forEach(nb => {
           agg[nb].crimeLevel = getCrimeLevelForRadius(agg[nb].count);
         });
@@ -394,7 +384,7 @@ export default function MapComponent() {
           name,
           crimeCount: data.count,
           crimeTypes: data.types,
-          crimeLevel: data.crimeLevel, // Use the original crime level system
+          crimeLevel: data.crimeLevel,
           center: {
             lat: data.points.reduce((s, p) => s + p.lat, 0) / data.points.length,
             lng: data.points.reduce((s, p) => s + p.lng, 0) / data.points.length,
@@ -410,14 +400,26 @@ export default function MapComponent() {
     })();
   }, []);
 
-  // User profile functions
+  // User profile functions - UPDATED to use localStorage/backend
   const handleLogout = async () => {
     try {
       // Stop tracking before logout
       if (isTracking) {
         await handleStopTracking();
       }
-      await signOut(auth);
+      
+      // Clear localStorage
+      localStorage.removeItem('user');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('obsTempCredentials');
+      localStorage.removeItem('activeTrackingId');
+      localStorage.removeItem('safetyData');
+      
+      setUser(null);
+      setUserProfile(null);
+      
+      // Dispatch event for App.jsx
+      window.dispatchEvent(new Event('auth-state-changed'));
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -472,13 +474,18 @@ export default function MapComponent() {
     setProfileError('');
 
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        ...profileForm,
-        updatedAt: new Date(),
-      });
-
-      const updatedDoc = await getDoc(doc(db, 'users', user.uid));
-      setUserProfile(updatedDoc.data());
+      // Update localStorage
+      const updatedUser = {
+        ...user,
+        name: profileForm.name,
+        surname: profileForm.surname,
+        cell: profileForm.cell,
+        emergencyContacts: profileForm.emergencyContacts
+      };
+      
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setUserProfile(updatedUser);
       setIsEditing(false);
       alert('Profile updated successfully!');
     } catch (error) {
@@ -489,14 +496,13 @@ export default function MapComponent() {
     }
   };
 
-  // Enhanced route safety calculation - FIXED VERSION
+  // Enhanced route safety calculation
   const calculateRouteSafety = (route, neighborhoods) => {
     const path = route.overview_path;
     let highRiskCount = 0;    // >270 crimes
     let moderateRiskCount = 0; // 230-270 crimes
     let safeRiskCount = 0;    // <230 crimes
     
-    // Convert path to simple lat/lng objects
     const routePoints = path.map(point => ({
       lat: point.lat(),
       lng: point.lng()
@@ -504,16 +510,12 @@ export default function MapComponent() {
     
     console.log("Calculating safety for route with", routePoints.length, "points");
     
-    // Check for crime hotspots with proper distance calculation - USING ORIGINAL RISK LEVEL SYSTEM
     for (let hotspot of neighborhoods) {
       let isNearHotspot = false;
       
-      // Check each point in the route against this hotspot
       for (let routePoint of routePoints) {
         const distance = haversine(routePoint, hotspot.center);
-        
-        // If any point is within the hotspot radius, mark as near
-        if (distance <= (RADIUS / 1000)) { // Convert meters to km
+        if (distance <= (RADIUS / 1000)) {
           isNearHotspot = true;
           break;
         }
@@ -522,29 +524,25 @@ export default function MapComponent() {
       if (isNearHotspot) {
         console.log(`Route passes through ${hotspot.name} (${hotspot.crimeLevel} risk, ${hotspot.crimeCount} crimes)`);
         
-        // Use the ORIGINAL risk level system for safe routing
         switch (hotspot.crimeLevel) {
-          case 'high': // >270 crimes
+          case 'high':
             highRiskCount++;
             break;
-          case 'medium': // 230-270 crimes
+          case 'medium':
             moderateRiskCount++;
             break;
-          case 'low': // <230 crimes
+          case 'low':
             safeRiskCount++;
             break;
         }
       }
     }
     
-    // Calculate overall safety level - FIXED LOGIC
     const crimeRiskScore = (highRiskCount * 10) + (moderateRiskCount * 5) + (safeRiskCount * 1);
     const totalRiskScore = crimeRiskScore;
     
     console.log(`Risk scores - Crime: ${crimeRiskScore}, Total: ${totalRiskScore}`);
-    console.log(`Crime breakdown - High: ${highRiskCount}, Moderate: ${moderateRiskCount}, Safe: ${safeRiskCount}`);
     
-    // FIXED: Enhanced route safety level determination
     if (highRiskCount === 0 && moderateRiskCount === 0) {
       return { 
         level: "safe", 
@@ -579,13 +577,9 @@ export default function MapComponent() {
     let safestSafety = calculateRouteSafety(routes[0], neighborhoods);
     let minRiskScore = safestSafety.totalRiskScore;
     
-    console.log("Route 0 risk score:", safestSafety.totalRiskScore, safestSafety);
-    
     for (let i = 1; i < routes.length; i++) {
       const safety = calculateRouteSafety(routes[i], neighborhoods);
       const riskScore = safety.totalRiskScore;
-      
-      console.log(`Route ${i} risk score:`, riskScore, safety);
       
       if (riskScore < minRiskScore) {
         minRiskScore = riskScore;
@@ -594,18 +588,15 @@ export default function MapComponent() {
       }
     }
     
-    console.log("Selected safest route with risk score:", minRiskScore, safestSafety);
     return { route: safestRoute, safety: safestSafety };
   };
 
-  // Enhanced safety message function
   const getSafetyMessage = (safety) => {
     if (!safety) return "";
     
     let message = "";
     const crimeParts = [];
     
-    // Use RISK LEVEL terminology for crime areas
     if (safety.highRiskCount > 0) {
       crimeParts.push(`${safety.highRiskCount} high-risk crime area${safety.highRiskCount !== 1 ? 's' : ''}`);
     }
@@ -616,27 +607,21 @@ export default function MapComponent() {
       crimeParts.push(`${safety.safeRiskCount} safe crime area${safety.safeRiskCount !== 1 ? 's' : ''}`);
     }
     
-    // Build comprehensive risk assessment
     const hasHighRiskCrime = safety.highRiskCount > 0;
     const hasModerateRiskCrime = safety.moderateRiskCount > 0;
     const hasOnlySafeAreas = safety.highRiskCount === 0 && safety.moderateRiskCount === 0;
     
-    // Determine overall risk level and craft appropriate message
     if (hasHighRiskCrime) {
-      // HIGH RISK SCENARIOS
       message = `🚨 HIGH RISK - Route passes through ${safety.highRiskCount} high-crime area${safety.highRiskCount !== 1 ? 's' : ''}. Avoid this route if possible or ensure extra safety precautions.`;
     } else if (hasModerateRiskCrime) {
-      // MODERATE RISK SCENARIOS
       message = `⚠️ MODERATE RISK - Route passes through ${safety.moderateRiskCount} moderate-crime area${safety.moderateRiskCount !== 1 ? 's' : ''}. Remain vigilant during your journey.`;
     } else if (hasOnlySafeAreas) {
-      // SAFE SCENARIOS
       if (safety.safeRiskCount > 0) {
         message = `✅ SAFE ROUTE - Passes through ${safety.safeRiskCount} low-crime area${safety.safeRiskCount !== 1 ? 's' : ''}. This is your safest option.`;
       } else {
         message = `✅ EXCELLENT ROUTE - No crime hotspots detected along this path.`;
       }
     } else {
-      // FALLBACK - Use detailed description
       if (crimeParts.length > 0) {
         message = `Route assessment: Passes through ${crimeParts.join(', ')}.`;
       } else {
@@ -644,7 +629,6 @@ export default function MapComponent() {
       }
     }
     
-    // Add specific counts for transparency
     message += ` [High-risk crimes: ${safety.highRiskCount}, Moderate: ${safety.moderateRiskCount}, Safe: ${safety.safeRiskCount}]`;
     
     return message;
@@ -659,31 +643,27 @@ export default function MapComponent() {
     }
   };
 
-  // Updated route color function to use safety-based colors
   const getRouteColor = (safetyLevel) => {
     switch (safetyLevel) {
       case "safe": 
-        return "#00FF00"; // Green for safe routes
+        return "#00FF00";
       case "moderate": 
-        return "#FFFF00"; // Yellow for moderate risk routes
+        return "#FFFF00";
       case "risky": 
-        return "#FF0000"; // Red for risky routes
+        return "#FF0000";
       default: 
-        return "#FF69B4"; // Pink as fallback
+        return "#FF69B4";
     }
   };
 
-  // Get opacity for crime hotspots based on whether a route is displayed
   const getCrimeHotspotOpacity = () => {
-    return directionsResponse ? 0.05 : 0.15; // Faded when route is shown, normal otherwise
+    return directionsResponse ? 0.05 : 0.15;
   };
 
-  // Get stroke opacity for crime hotspots based on whether a route is displayed
   const getCrimeHotspotStrokeOpacity = () => {
-    return directionsResponse ? 0.3 : 0.8; // Faded when route is shown, normal otherwise
+    return directionsResponse ? 0.3 : 0.8;
   };
 
-  // Existing map functions
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
@@ -765,12 +745,10 @@ export default function MapComponent() {
     mapRef.current = map;
   };
 
-  // ORIGINAL color system for crime hotspots based on crime count
   const getNeighborhoodColor = (crimeCount) => {
-    // ORIGINAL SYSTEM for safe routing:
-    if (crimeCount < 230) return "#00FF00";    // Safe: <230 crimes
-    if (crimeCount <= 270) return "#FFFF00";   // Moderate: 230-270 crimes
-    return "#FF0000";                          // High: >270 crimes
+    if (crimeCount < 230) return "#00FF00";
+    if (crimeCount <= 270) return "#FFFF00";
+    return "#FF0000";
   };
 
   const requestDirections = (origin, dest) => {
@@ -809,7 +787,6 @@ export default function MapComponent() {
 
           const googlePath = route.overview_path;
 
-          // Update filtered points and neighborhoods based on the selected route
           setFilteredPoints(
             points.filter((p) =>
               googlePath.some((pt) => haversine({ lat: p.lat, lng: p.lng }, { lat: pt.lat(), lng: pt.lng() }) <= MAX_DIST_KM)
@@ -855,7 +832,7 @@ export default function MapComponent() {
     if (!destCoords) {
       try {
         const geocodeRes = await fetch(
-          `https://gewhackai25.onrender.com/api/geocode?address=${encodeURIComponent(destination)}`
+          `http://localhost:5000/api/geocode?address=${encodeURIComponent(destination)}`
         );
         if (!geocodeRes.ok) throw new Error("Geocoding failed");
         
@@ -928,18 +905,33 @@ export default function MapComponent() {
     }
   };
 
+  // Add handleStopTracking function
+  const handleStopTracking = async () => {
+    if (!activeTrackingId) return;
+    
+    try {
+      await storeTrackingSession(trackingLocation, safetyData, 'stop');
+      setIsTracking(false);
+      setTrackingLocation(null);
+      alert('Tracking stopped');
+    } catch (error) {
+      console.error('Error stopping tracking:', error);
+      alert('Failed to stop tracking');
+    }
+  };
+
   if (!isLoaded) return <div className="map-container--loading">Loading Map...</div>;
 
   return (
     <div className="map-wrapper">
-      {/* User Profile Button */}
+      {/* User Profile Button - Updated to show user name from localStorage */}
       <div className="user-profile-button">
         <button 
           className="profile-btn"
           onClick={() => setShowProfileModal(true)}
           title="View Profile"
         >
-          👤 {userProfile?.name || 'Profile'}
+          👤 {userProfile?.name || user?.name || 'Profile'}
         </button>
       </div>
 
@@ -986,8 +978,6 @@ export default function MapComponent() {
         }}
         onLoad={onMapLoad}
       >
-        {/* Crime hotspots (circles) - show when toggle is ON - USING ORIGINAL COLOR SYSTEM */}
-        {/* Updated to use dynamic opacity based on route display */}
         {showCircles &&
           filteredNeighborhoods.map((n) => (
             <Circle
@@ -995,9 +985,9 @@ export default function MapComponent() {
               center={n.center}
               radius={RADIUS}
               options={{
-                fillColor: getNeighborhoodColor(n.crimeCount), // ORIGINAL color system
-                fillOpacity: getCrimeHotspotOpacity(), // Dynamic opacity
-                strokeOpacity: getCrimeHotspotStrokeOpacity(), // Dynamic stroke opacity
+                fillColor: getNeighborhoodColor(n.crimeCount),
+                fillOpacity: getCrimeHotspotOpacity(),
+                strokeOpacity: getCrimeHotspotStrokeOpacity(),
                 strokeWeight: 2,
                 strokeColor: getNeighborhoodColor(n.crimeCount),
               }}
@@ -1005,7 +995,6 @@ export default function MapComponent() {
             />
           ))}
 
-        {/* Crime pin points - show when crime hotspots (circles) are NOT shown */}
         {!showCircles &&
           filteredPoints.map((crime, idx) => (
             <Marker
@@ -1077,7 +1066,6 @@ export default function MapComponent() {
             }}
           >
             <div className="modern-info-window">
-              {/* Header Section */}
               <div className="info-window-header">
                 <div className="neighborhood-title">
                   <h3>{selectedNeighborhood.name}</h3>
@@ -1089,7 +1077,6 @@ export default function MapComponent() {
                 </div>
               </div>
 
-              {/* Safety Score */}
               <div className="safety-score-section">
                 <div className="safety-meter">
                   <div className="safety-labels">
@@ -1109,7 +1096,6 @@ export default function MapComponent() {
                 </div>
               </div>
 
-              {/* Key Statistics Grid */}
               <div className="stats-grid">
                 <div className="stat-card">
                   <div className="stat-icon">🕒</div>
@@ -1144,7 +1130,6 @@ export default function MapComponent() {
                 </div>
               </div>
 
-              {/* Safety Recommendations */}
               <div className="recommendations-section">
                 <div className="recommendations-header">
                   <span className="recommendations-icon">💡</span>
@@ -1155,7 +1140,6 @@ export default function MapComponent() {
                 </p>
               </div>
 
-              {/* Action Buttons */}
               <div className="action-buttons">
                 <button className="action-btn action-btn--primary">
                   🗺️ Plan Route
@@ -1168,13 +1152,12 @@ export default function MapComponent() {
           </InfoWindow>
         )}
 
-        {/* Use DirectionsRenderer for proper map directions with dynamic safety colors */}
         {directionsResponse && routeSafety && (
           <DirectionsRenderer
             directions={directionsResponse}
             options={{
               polylineOptions: {
-                strokeColor: getRouteColor(routeSafety.level), // Dynamic color based on safety
+                strokeColor: getRouteColor(routeSafety.level),
                 strokeWeight: 6,
                 strokeOpacity: 0.9,
                 zIndex: 1000,
@@ -1184,12 +1167,11 @@ export default function MapComponent() {
           />
         )}
 
-        {/* Keep the Polyline as backup with dynamic safety colors */}
         {routePath.length > 0 && directionsResponse && routeSafety && (
           <Polyline
             path={routePath}
             options={{
-              strokeColor: getRouteColor(routeSafety.level), // Dynamic color based on safety
+              strokeColor: getRouteColor(routeSafety.level),
               strokeWeight: 8,
               strokeOpacity: 0.9,
               zIndex: 1000,
@@ -1304,7 +1286,6 @@ export default function MapComponent() {
             )}
           </button>
 
-          {/* Show Analysis Button */}
           <button 
             onClick={() => setShowPredictiveDashboard(true)}
             className="destination-card__button destination-card__button--analysis"
@@ -1312,7 +1293,6 @@ export default function MapComponent() {
             📊 Safety Forecast
           </button>
 
-          {/* Communities Button */}
           <button 
             onClick={() => setShowCommunities(true)}
             className="destination-card__button destination-card__button--communities"

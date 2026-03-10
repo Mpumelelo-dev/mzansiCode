@@ -1,23 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db, storage } from './firebaseConfig';
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  where, 
-  orderBy, 
-  serverTimestamp,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth } from './firebaseConfig';
+import axios from 'axios';
 import './Communities.scss';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Cape Town Areas Data
 const capeTownAreas = [
@@ -354,15 +339,15 @@ const PostComponent = ({
     if (isLiking) return;
     
     setIsLiking(true);
-    const wasLiked = localLikes.includes(user.uid);
+    const wasLiked = localLikes.includes(user.userId);
     const newLikes = wasLiked 
-      ? localLikes.filter(uid => uid !== user.uid)
-      : [...localLikes, user.uid];
+      ? localLikes.filter(id => id !== user.userId)
+      : [...localLikes, user.userId];
     
     setLocalLikes(newLikes);
     
     try {
-      await onLikePost(post.id, post.likes || []);
+      await onLikePost(post.id, post.likes || [], user.userId);
     } catch (error) {
       setLocalLikes(post.likes || []);
       console.error('Error liking post:', error);
@@ -382,11 +367,10 @@ const PostComponent = ({
           <div 
             className="user-avatar enhanced"
             style={{ 
-              backgroundImage: post.userAvatar ? `url(${post.userAvatar})` : undefined,
-              backgroundColor: post.userAvatar ? 'transparent' : postTypes[post.type]?.color || '#2563eb'
+              backgroundColor: postTypes[post.type]?.color || '#2563eb'
             }}
           >
-            {!post.userAvatar && (post.userName?.charAt(0)?.toUpperCase() || 'U')}
+            {post.userName?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div className="user-details">
             <div className="username-row">
@@ -420,12 +404,12 @@ const PostComponent = ({
 
       <div className="post-engagement enhanced">
         <button 
-          className={`engagement-btn like-btn ${localLikes.includes(user?.uid) ? 'liked' : ''} ${isLiking ? 'liking' : ''}`}
+          className={`engagement-btn like-btn ${localLikes.includes(user?.userId) ? 'liked' : ''} ${isLiking ? 'liking' : ''}`}
           onClick={handleLike}
           disabled={isLiking}
         >
           <span className="btn-icon">
-            {localLikes.includes(user?.uid) ? '❤️' : '🤍'}
+            {localLikes.includes(user?.userId) ? '❤️' : '🤍'}
           </span>
           <span className="btn-count">{localLikes.length}</span>
         </button>
@@ -450,11 +434,10 @@ const PostComponent = ({
                   <div 
                     className="comment-avatar"
                     style={{
-                      backgroundColor: comment.userAvatar ? 'transparent' : '#2563eb',
-                      backgroundImage: comment.userAvatar ? `url(${comment.userAvatar})` : undefined
+                      backgroundColor: '#2563eb'
                     }}
                   >
-                    {!comment.userAvatar && (comment.userName?.charAt(0)?.toUpperCase() || 'U')}
+                    {comment.userName?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div className="comment-content">
                     <div className="comment-header">
@@ -562,7 +545,100 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
   const suburbs = ['all', ...new Set(safetyAreas.map(area => area.suburb))];
   const riskLevels = ['all', ...new Set(safetyAreas.map(area => area.type))];
 
-  // Image upload function
+  // Load user from localStorage (from AuthForm)
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        
+        // Load user's watch areas from localStorage
+        const storedWatchAreas = localStorage.getItem(`watchAreas_${userData.userId}`);
+        if (storedWatchAreas) {
+          setUserWatchAreas(JSON.parse(storedWatchAreas));
+        } else {
+          // Initialize empty watch areas
+          localStorage.setItem(`watchAreas_${userData.userId}`, JSON.stringify([]));
+          setUserWatchAreas([]);
+        }
+      } catch (error) {
+        console.error('Error loading user from localStorage:', error);
+      }
+    }
+    setInitialized(true);
+
+    // Listen for auth changes
+    const handleAuthChange = () => {
+      const updatedUser = localStorage.getItem('user');
+      if (updatedUser) {
+        setUser(JSON.parse(updatedUser));
+      } else {
+        setUser(null);
+        setUserWatchAreas([]);
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthChange);
+    return () => window.removeEventListener('auth-state-changed', handleAuthChange);
+  }, []);
+
+  // Save watch areas to localStorage whenever they change
+  useEffect(() => {
+    if (user && userWatchAreas.length >= 0) {
+      localStorage.setItem(`watchAreas_${user.userId}`, JSON.stringify(userWatchAreas));
+    }
+  }, [userWatchAreas, user]);
+
+  // Load posts from localStorage
+  useEffect(() => {
+    if (!initialized) return;
+
+    // Load posts from localStorage
+    const storedPosts = localStorage.getItem('communityPosts');
+    if (storedPosts) {
+      try {
+        const parsedPosts = JSON.parse(storedPosts);
+        
+        // Filter posts based on active tab and selected area
+        let filteredPosts = parsedPosts;
+        
+        if (activeHubTab === 'community') {
+          if (activeTab === 'feed' && selectedArea) {
+            filteredPosts = parsedPosts.filter(post => post.area === selectedArea.name);
+          } else if (activeTab === 'global') {
+            // Show all posts for global feed
+            filteredPosts = parsedPosts;
+          } else {
+            filteredPosts = [];
+          }
+        } else {
+          filteredPosts = [];
+        }
+        
+        // Sort by timestamp descending (newest first)
+        filteredPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        setPosts(filteredPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        setPosts([]);
+      }
+    } else {
+      // Initialize with empty posts array
+      localStorage.setItem('communityPosts', JSON.stringify([]));
+      setPosts([]);
+    }
+  }, [selectedArea, activeTab, initialized, activeHubTab]);
+
+  // Save posts to localStorage
+  const savePosts = (newPosts) => {
+    const allPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+    const updatedPosts = [...allPosts, ...newPosts];
+    localStorage.setItem('communityPosts', JSON.stringify(updatedPosts));
+  };
+
+  // Image upload function (simulated for now - you can implement actual upload later)
   const uploadImage = async (file) => {
     if (!file) return null;
     
@@ -579,14 +655,10 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
         throw new Error('Image size must be less than 5MB');
       }
       
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `post-images/${user.uid}/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+      // For now, create a local URL (in production, upload to OBS)
+      const imageUrl = URL.createObjectURL(file);
+      return imageUrl;
       
-      const storageRef = ref(storage, fileName);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      
-      return downloadURL;
     } catch (error) {
       console.error('Error uploading image:', error);
       throw new Error('Failed to upload image. Please try again.');
@@ -656,100 +728,6 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
     setShowNewPostForm(false);
   };
 
-  // Auth and initialization
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      if (user) {
-        await loadUserWatchAreas(user.uid);
-      } else {
-        setUserWatchAreas([]);
-        setSelectedArea(null);
-      }
-      setInitialized(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Load user watch areas
-  const loadUserWatchAreas = async (userId) => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const watchAreas = userData.watchAreas || [];
-        setUserWatchAreas(watchAreas);
-        
-        if (watchAreas.length > 0 && safetyAreas) {
-          const firstWatchedArea = safetyAreas.find(area => area.name === watchAreas[0]);
-          if (firstWatchedArea) {
-            setSelectedArea(firstWatchedArea);
-          }
-        }
-      } else {
-        await setDoc(doc(db, 'users', userId), {
-          watchAreas: [],
-          createdAt: serverTimestamp()
-        });
-        setUserWatchAreas([]);
-      }
-    } catch (error) {
-      console.error('Error loading watch areas:', error);
-    }
-  };
-
-  // Posts loading
-  useEffect(() => {
-    if (!initialized) return;
-
-    const postsRef = collection(db, 'safetyCommunityPosts');
-    let q;
-
-    try {
-      if (activeHubTab === 'community' && activeTab === 'feed') {
-        if (!selectedArea || userWatchAreas.length === 0) {
-          setPosts([]);
-          return;
-        }
-        
-        q = query(
-          postsRef,
-          where('area', '==', selectedArea.name),
-          orderBy('timestamp', 'desc')
-        );
-      } else if (activeHubTab === 'community' && activeTab === 'global') {
-        q = query(postsRef, orderBy('timestamp', 'desc'));
-      } else {
-        setPosts([]);
-        return;
-      }
-
-      const unsubscribe = onSnapshot(q, 
-        (snapshot) => {
-          const postsData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              ...data,
-              replies: data.replies || [],
-              likes: data.likes || []
-            };
-          });
-          setPosts(postsData);
-        },
-        (error) => {
-          console.error('Firestore error:', error);
-        }
-      );
-
-      return () => unsubscribe();
-    } catch (error) {
-      console.error('Error setting up listener:', error);
-      setPosts([]);
-    }
-  }, [selectedArea, activeTab, initialized, userWatchAreas.length, activeHubTab]);
-
   // Create post function
   const createPost = async () => {
     if (!newPost.content.trim() || !selectedArea || !user) {
@@ -776,21 +754,27 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
       }
 
       const postData = {
+        id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         area: selectedArea.name,
         title: newPost.title.trim() || `${postTypes[newPost.type].label} - ${selectedArea.name}`,
         content: newPost.content.trim(),
-        userId: user.uid,
+        userId: user.userId,
         userEmail: user.email,
-        userName: user.displayName || user.email.split('@')[0],
-        userAvatar: user.photoURL,
-        timestamp: serverTimestamp(),
+        userName: user.name || user.email.split('@')[0],
+        timestamp: new Date().toISOString(),
         type: newPost.type,
         replies: [],
         likes: [],
         image: imageUrl
       };
 
-      await addDoc(collection(db, 'safetyCommunityPosts'), postData);
+      // Save to localStorage
+      const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+      existingPosts.push(postData);
+      localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+      
+      // Update current posts
+      setPosts(prev => [postData, ...prev]);
       
       resetPostForm();
       alert('Post shared successfully!');
@@ -811,11 +795,6 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
     }
 
     try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        watchAreas: arrayUnion(areaName)
-      });
-
       const updatedWatchAreas = [...userWatchAreas, areaName];
       setUserWatchAreas(updatedWatchAreas);
       
@@ -836,11 +815,6 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
     if (!user) return;
 
     try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        watchAreas: arrayRemove(areaName)
-      });
-
       const updatedWatchAreas = userWatchAreas.filter(name => name !== areaName);
       setUserWatchAreas(updatedWatchAreas);
       
@@ -900,27 +874,34 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
     return userWatchAreas.includes(areaName);
   };
 
-  // Get watcher count
+  // Get watcher count (simulated)
   const getWatcherCount = (areaName) => {
-    return userWatchAreas.filter(watch => watch === areaName).length;
+    return Math.floor(Math.random() * 10) + 1; // Random count for demo
   };
 
   // Like post
-  const likePost = async (postId, currentLikes = []) => {
+  const likePost = async (postId, currentLikes = [], userId) => {
     if (!user) return;
 
     try {
-      const postRef = doc(db, 'safetyCommunityPosts', postId);
-      const hasLiked = currentLikes.includes(user.uid);
+      const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+      const postIndex = existingPosts.findIndex(p => p.id === postId);
       
-      if (hasLiked) {
-        await updateDoc(postRef, {
-          likes: arrayRemove(user.uid)
-        });
-      } else {
-        await updateDoc(postRef, {
-          likes: arrayUnion(user.uid)
-        });
+      if (postIndex !== -1) {
+        const hasLiked = currentLikes.includes(userId);
+        
+        if (hasLiked) {
+          existingPosts[postIndex].likes = currentLikes.filter(id => id !== userId);
+        } else {
+          existingPosts[postIndex].likes = [...currentLikes, userId];
+        }
+        
+        localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+        
+        // Update current posts
+        setPosts(prev => prev.map(p => 
+          p.id === postId ? existingPosts[postIndex] : p
+        ));
       }
     } catch (error) {
       console.error('Error liking post:', error);
@@ -935,20 +916,32 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
     setReplying(prev => ({ ...prev, [postId]: true }));
 
     try {
-      const postRef = doc(db, 'safetyCommunityPosts', postId);
-      const comment = {
-        id: Date.now().toString(),
-        content: commentText.trim(),
-        userId: user.uid,
-        userName: user.displayName || user.email.split('@')[0],
-        timestamp: new Date().toISOString()
-      };
-
-      await updateDoc(postRef, {
-        replies: arrayUnion(comment)
-      });
+      const existingPosts = JSON.parse(localStorage.getItem('communityPosts') || '[]');
+      const postIndex = existingPosts.findIndex(p => p.id === postId);
       
-      setReplyContent(prev => ({ ...prev, [postId]: '' }));
+      if (postIndex !== -1) {
+        const comment = {
+          id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          content: commentText.trim(),
+          userId: user.userId,
+          userName: user.name || user.email.split('@')[0],
+          timestamp: new Date().toISOString()
+        };
+
+        if (!existingPosts[postIndex].replies) {
+          existingPosts[postIndex].replies = [];
+        }
+        
+        existingPosts[postIndex].replies.push(comment);
+        localStorage.setItem('communityPosts', JSON.stringify(existingPosts));
+        
+        // Update current posts
+        setPosts(prev => prev.map(p => 
+          p.id === postId ? existingPosts[postIndex] : p
+        ));
+        
+        setReplyContent(prev => ({ ...prev, [postId]: '' }));
+      }
       
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -961,7 +954,7 @@ const SafeMzansiCommunity = ({ onClose, currentLocation }) => {
   const formatSocialTime = (timestamp) => {
     if (!timestamp) return '';
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const date = new Date(timestamp);
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
